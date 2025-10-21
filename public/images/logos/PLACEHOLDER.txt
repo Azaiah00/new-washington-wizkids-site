@@ -1,0 +1,18 @@
+LOGO PLACEHOLDER
+
+Your logo file should be placed here:
+public/images/logos/logofred.png
+
+Requirements:
+- Format: PNG with transparent background
+- Minimum size: 200x200px
+- Recommended: 400x400px for retina displays
+- File size: Keep under 100KB
+
+For now, you can:
+1. Use a placeholder image service
+2. Download a temporary logo
+3. Create one with a design tool
+
+The site is configured to look for: logofred.png
+
