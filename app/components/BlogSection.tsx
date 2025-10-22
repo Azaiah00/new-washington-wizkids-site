@@ -6,13 +6,40 @@
  * - 3-column responsive grid
  * - Category tags (NEWS, ANALYSIS, RUMOR MILL)
  * - Card hover effects
- * - Excerpt text with read more links
+ * - Fetches live data from Sanity CMS
+ * - Falls back to static data if Sanity not configured yet
+ * 
+ * HOW THIS WORKS:
+ * 1. This is now an async component (can fetch data before rendering)
+ * 2. Tries to get posts from Sanity
+ * 3. If Sanity isn't set up yet, uses static sample data
+ * 4. Displays posts in the same grid layout
  */
 
 import Image from 'next/image'
 import { BLOG_POSTS } from '@/lib/data'
+import { getAllBlogPosts } from '@/sanity/lib/queries'
 
-export default function BlogSection() {
+export default async function BlogSection() {
+  // Fetch blog posts from Sanity (or use fallback)
+  // This runs on the server before the page is sent to the browser
+  let posts = await getAllBlogPosts()
+  
+  // Fallback to static data if Sanity returns empty
+  // (happens before you set up Sanity or if there's an error)
+  if (!posts || posts.length === 0) {
+    posts = BLOG_POSTS.map(post => ({
+      _id: post.id,
+      title: post.title,
+      excerpt: post.excerpt,
+      featuredImage: post.image,
+      featuredImageAlt: post.title,
+      category: post.category,
+      slug: { current: '#' },
+      publishedAt: new Date().toISOString(),
+      author: 'Washington WizKids'
+    }))
+  }
   /**
    * Returns color class based on blog category
    */
@@ -45,16 +72,16 @@ export default function BlogSection() {
 
         {/* Blog Cards Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {BLOG_POSTS.map((post) => (
+          {posts.map((post) => (
             <article
-              key={post.id}
+              key={post._id}
               className="card-hover-effect bg-gray-50 rounded-lg shadow-md overflow-hidden"
             >
               {/* Post Thumbnail */}
               <div className="relative w-full h-48">
                 <Image
-                  src={post.image}
-                  alt={post.title}
+                  src={post.featuredImage}
+                  alt={post.featuredImageAlt || post.title}
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -80,9 +107,9 @@ export default function BlogSection() {
                   {post.excerpt}
                 </p>
 
-                {/* Read More Link */}
+                {/* Read More Link - Will link to full post page in future */}
                 <a
-                  href={post.link}
+                  href={`#`}
                   className="inline-block mt-3 text-sm text-wizards-navy font-bold hover:underline focus-outline"
                 >
                   Read More →
